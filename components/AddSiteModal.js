@@ -1,6 +1,7 @@
-import { useRef } from "react";
 const { useDisclosure } = require("@chakra-ui/core");
+import useSWR, { mutate } from "swr";
 import { useForm } from "react-hook-form";
+import fetcher from "@/utils/fetcher";
 
 import {
   Modal,
@@ -19,19 +20,24 @@ import {
 import { createSite } from "@/lib/db";
 import { useAuth } from "@/lib/auth";
 
-const AddSiteModal = () => {
+const AddSiteModal = ({ children }) => {
   const auth = useAuth();
   const initialRef = React.useRef();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { handleSubmit, register } = useForm();
   const toast = useToast();
+  const { data } = useSWR("/api/sites", fetcher);
+  console.log(data);
+
   const onSubmit = ({ name, url }) => {
-    createSite({
+    const newSite = {
       authorId: auth.user.uid,
       createdAt: new Date().toISOString(),
       name,
       url,
-    });
+    };
+
+    createSite(newSite);
     toast({
       title: "Success",
       description: "We've successfully created your site for you.",
@@ -39,12 +45,34 @@ const AddSiteModal = () => {
       duration: 5000,
       isClosable: true,
     });
+    mutate("api/sites", { sites: [...data.sites, newSite] });
+    mutate(
+      "/api/sites",
+      async (data) => {
+        // const user = await fetcher("/api/users/1");
+        return { sites: [...data.sites, newSite] };
+      },
+      false
+    );
     onClose();
   };
 
   return (
     <>
-      <Button onClick={onOpen}>Add your first site</Button>
+      <Button
+        id="add-site-modal-button"
+        onClick={onOpen}
+        backgroundColor="gray.900"
+        color="white"
+        fontWeight="medium"
+        _hover={{ bg: "gray.700" }}
+        _active={{
+          bg: "gray.800",
+          transform: "scale(0.95)",
+        }}
+      >
+        {children}
+      </Button>
 
       <Modal initialFocusRef={initialRef} isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
