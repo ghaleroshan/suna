@@ -25,7 +25,7 @@ export default function Home() {
             </Link>
           </>
         ) : (
-          <Button onClick={handleClick}>Sign IN with Google</Button>
+          <Button onClick={handleClick}>Sign in with Google</Button>
         )}
       </main>
     </>

@@ -12,15 +12,17 @@ import {
   Heading,
 } from "@chakra-ui/core";
 import { useAuth } from "@/lib/auth";
+import AddSiteModal from "./AddSiteModal";
 
 const DashboardShell = ({ children }) => {
+  const auth = useAuth();
+  const { user } = auth;
   const onClick = () => {
     auth.signout();
   };
 
-  const auth = useAuth();
   return (
-    <Flex flexDirection="column">
+    <Flex flexDirection="column" height="100vh">
       <Flex
         justifyContent="space-between"
         alignItems="center"
@@ -33,10 +35,12 @@ const DashboardShell = ({ children }) => {
           <Link>feedback</Link>
         </Stack>
         <Stack isInline justifyContent="space-between" alignItems="center">
-          <Link href="/" passHref mr="6">
-            <a onClick={onClick}> Log Out</a>
+          <Link href="/" mr="6">
+            <Button onClick={onClick} variant="ghost">
+              Log Out
+            </Button>
           </Link>
-          <Avatar />
+          {!user ? "" : <Avatar src={user.photoUrl} />}
         </Stack>
       </Flex>
       <Flex backgroundColor="blackAlpha.50" p={8} height="100vh">
@@ -48,8 +52,9 @@ const DashboardShell = ({ children }) => {
           direction="column"
         >
           <Breadcrumb>
-            <BreadcrumbItem>
+            <BreadcrumbItem display="flex" justifyContent="space-between">
               <BreadcrumbLink>sites</BreadcrumbLink>
+              <AddSiteModal> Add Site</AddSiteModal>
             </BreadcrumbItem>
           </Breadcrumb>
           <Heading>Sites</Heading>
